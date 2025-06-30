@@ -22,10 +22,19 @@ function prompt(question) {
     }))
 }
 
-async function promptWithMinLength(question, minLength) {
+async function promptWithMinLength(question, minLength, regex = /.*/) {
     while (true) {
         const answer = await prompt(question)
-        if (answer.trim().length >= minLength) return answer.trim()
+        const trimmedAnswer = answer.trim()
+        
+        // Check regex first
+        if (!regex.test(trimmedAnswer)) {
+            console.log(`Input must match the pattern: ${regex.source}`)
+            continue
+        }
+        
+        // Then check length
+        if (trimmedAnswer.length >= minLength) return trimmedAnswer
         console.log(`Input must be at least ${minLength} characters.`)
     }
 }
@@ -51,7 +60,7 @@ async function download(url, destPath) {
 }
 
 async function main() {
-    const TOOL_DISPLAY_NAME = await promptWithMinLength('Tool Display Name (user-facing, min length: 5): ', 5)
+    const TOOL_DISPLAY_NAME = await promptWithMinLength('Tool Display Name (user-facing, min length: 5): ', 5, /^(?! )[A-Za-z0-9]+( [A-Za-z0-9]+)*(?<! )$/)
     const SHORT_TOOL_DESCRIPTION = await promptWithMinLength('Short Tool Description (user-facing, min length: 30): ', 30)
     const LONG_TOOL_DESCRIPTION = await promptWithMinLength('Long Tool Description (llm-facing, min length: 30): ', 30)
 
